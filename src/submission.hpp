@@ -26,15 +26,15 @@ public:
 };
 
 void apply_stencil(const Grid &old_grid, Grid &new_grid) {
-  int rows = old_grid.rows();
-  int cols = old_grid.cols();
+  const std::size_t rows = old_grid.rows();
+  const std::size_t cols = old_grid.cols();
 
-  for (int i = 0; i < cols; i++) {
+  for (std::size_t i = 0; i < cols; i++) {
     new_grid(0, i) = old_grid(0, i);
     new_grid(rows - 1, i) = old_grid(rows - 1, i);
   }
 
-  for (int i = 0; i < rows; i++) {
+  for (std::size_t i = 0; i < rows; i++) {
     new_grid(i, 0) = old_grid(i, 0);
     new_grid(i, cols - 1) = old_grid(i, cols - 1);
   }
@@ -43,6 +43,11 @@ void apply_stencil(const Grid &old_grid, Grid &new_grid) {
 #pragma omp parallel for schedule(static)
 #endif
   for (auto i = 1; i < rows - 1; ++i) {
+
+#ifdef _OPENMP
+#pragma omp simd
+#endif
+
     for (auto j = 1; j < cols - 1; ++j) {
       new_grid(i, j) = 0.5 * old_grid(i, j) +
                        0.125 * (old_grid(i - 1, j) + old_grid(i + 1, j) +
